@@ -1,0 +1,8 @@
+# generated stage reports and any local scratch
+reports/
+*.parquet
+*.jsonl
+__pycache__/
+.venv/
+*.pyc
+.DS_Store
