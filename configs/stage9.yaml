@@ -1,0 +1,4 @@
+# Stage 9 — instruction normalization. Pure deterministic normalization
+# (strip + collapse whitespace; case-folded key). No tunable parameters, but the
+# file exists so the stage loads through the same no-silent-defaults config path.
+normalize: whitespace_collapse_casefold_key

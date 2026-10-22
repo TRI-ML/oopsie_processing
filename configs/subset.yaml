@@ -1,0 +1,76 @@
+# Stage 10 manifest + exporters: representative multi-embodiment SUBSET.
+#
+# A bounded, immediately-trainable slice spanning distinct action spaces:
+#   Charles_UFAL   so101_follower   joint   5+1=6    single-arm
+#   BONN_MB        ur5              joint   6+1=7    single-arm
+#   Araya          franka_panda     cartes. 7+1=8    single-arm
+#   Enatic_OpenArm OpenArm_2.0      joint   16+2=18  bimanual
+#   CMU_Aire       dual_xarm7       cartes. 14+2=16  bimanual + success/failure
+#
+# Only CLEAN episodes flow in: quarantine paths skipped, per-episode alignment
+# mismatches skipped. No silent defaults.
+#
+# DISK SAFETY: caps are deliberately LOW and the materialization is STREAMED one
+# lab at a time (exporters/stream_to_s3.py) -- each lab is staged, exported to both
+# formats, uploaded to S3, and deleted locally before the next lab. The prior run
+# filled the root disk by accumulating ~98 GB of per-frame-JPEG WDS tars for 450
+# episodes locally; these caps + the per-lab stream keep local scratch tiny.
+
+# Per-lab episode caps. CMU_Aire is capped lowest (long ~multi-k-frame episodes,
+# the per-frame-JPEG WDS storage multiplier) and split across outcomes via
+# outcome_balanced_labs.
+labs:
+  Charles_UFAL: 30
+  BONN_MB: 30
+  Araya: 30
+  Enatic_OpenArm: 30
+  CMU_Aire: 15
+
+# Restrict a lab to h5 keys under this path prefix (keeps a mixed lab on one
+# consistent action space). Prefixes are relative to dataset_prefix.
+lab_path_filter:
+  CMU_Aire: CMU_Aire/grocery_packing/
+
+# Labs whose cap is split evenly across success/ and failure/ parent folders so
+# both outcomes are represented.
+outcome_balanced_labs:
+  - CMU_Aire
+
+# Phase-A reports consumed for cleanliness filtering.
+quarantine_file: /home/anthonyliang/.claude/jobs/d70b14fe/tmp/phaseA/quarantine.jsonl
+alignment_file: /home/anthonyliang/.claude/jobs/d70b14fe/tmp/phaseA/alignment.json
+
+# --- outputs / materialization ---
+# ALL local scratch for Phase B goes under phaseB2/ (disk-safety sandbox). The
+# streamer never lets this tree exceed ~15 GB: it stages/exports one lab, uploads
+# it, then deletes the local copy before the next lab.
+manifest_name: manifest            # writes manifest.parquet + manifest.jsonl
+durable_dir: /home/anthonyliang/.claude/jobs/d70b14fe/tmp/phaseB2        # manifest + summaries
+scratch_dir: /home/anthonyliang/.claude/jobs/d70b14fe/tmp/phaseB2/_scratch   # per-object temp
+subset_root: /home/anthonyliang/.claude/jobs/d70b14fe/tmp/phaseB2        # scratch root
+raw_stage_dir: /home/anthonyliang/.claude/jobs/d70b14fe/tmp/phaseB2/raw   # local raw mirror (one lab at a time)
+lerobot_repo_id: local/oopsie_clean_subset
+lerobot_home: /home/anthonyliang/.claude/jobs/d70b14fe/tmp/phaseB2/lerobot_home
+wds_out_dir: /home/anthonyliang/.claude/jobs/d70b14fe/tmp/phaseB2/wds   # per-lab subdirs <lab>/shards
+
+# S3 destination for the cleaned, exported artifact.
+s3_clean_prefix: s3://tri-ml-datasets-uw2/anthonyliang/oopsie_clean/
+s3_lerobot_prefix: s3://tri-ml-datasets-uw2/anthonyliang/oopsie_clean/lerobot/
+s3_wds_prefix: s3://tri-ml-datasets-uw2/anthonyliang/oopsie_clean/wds/
+
+# --- disk-safety guards (exporters/stream_to_s3.py) ---
+df_mount: /                        # mount whose free space we watch
+df_floor_gb: 80                    # STOP if free disk drops below this after a lab
+phaseB2_cap_gb: 15                 # STOP if the local phaseB2 tree exceeds this
+
+# Small lab re-downloaded from S3 after the stream to verify the WDS artifact loads
+# (its per-lab manifest+stats+shards round-trip through S3).
+verify_lab: Charles_UFAL
+
+# --- encode / sample params (match the proven converters) ---
+image_hw: 224
+fps: 10                 # LeRobot dataset fps (both proven converters use 10)
+wds_image_indices: [-1, 0]       # anchor-relative image offsets (vla_foundry)
+wds_lowdim_future: 15            # future lowdim horizon per sample
+wds_samples_per_shard: 128
+wds_jpeg_quality: 95

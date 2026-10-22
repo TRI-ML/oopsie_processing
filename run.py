@@ -21,6 +21,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 from oopsie_processing import (  # noqa: E402
     stage1_taxonomy, stage2_dedup, stage3_quarantine,
     stage4_schema, stage7_alignment, data_quality,
+    stage5_harmonize, stage10_manifest,
 )
 from oopsie_processing.common import config, scan  # noqa: E402
 
@@ -31,6 +32,8 @@ STAGES = {
     "stage4": stage4_schema.run,
     "stage7": stage7_alignment.run,
     "dq": data_quality.run,
+    "stage5": stage5_harmonize.run,       # Phase B: action-space mapping report
+    "stage10": stage10_manifest.run,      # Phase B: build cleaned-subset manifest
 }
 
 
@@ -49,6 +52,20 @@ def phaseA():
     data_quality.run(records=records)
 
 
+def manifest_parquet():
+    """Write manifest.parquet from the already-written manifest.jsonl (needs
+    pandas+pyarrow). Use when stage10 ran in a boto3-only env without a parquet
+    engine."""
+    import json
+    cfg = config.load_merged("subset")
+    name = config.require(cfg, "manifest_name")
+    from oopsie_processing.common import report
+    jsonl = f"{report.durable_dir(cfg)}/{name}.jsonl"
+    rows = [json.loads(l) for l in open(jsonl) if l.strip()]
+    stage10_manifest._write_parquet(cfg, rows)
+    print(f"[manifest_parquet] wrote {name}.parquet from {len(rows)} rows")
+
+
 def main():
     if len(sys.argv) != 2:
         print(__doc__)
@@ -56,6 +73,8 @@ def main():
     cmd = sys.argv[1]
     if cmd == "phaseA":
         phaseA()
+    elif cmd == "manifest_parquet":
+        manifest_parquet()
     elif cmd in STAGES:
         STAGES[cmd]()
     else:

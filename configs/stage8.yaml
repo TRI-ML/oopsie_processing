@@ -1,0 +1,5 @@
+# Stage 8 — optimality-label consolidation.
+# Labs that use a success/failure PARENT FOLDER convention; used only as a
+# fallback when an episode carries no episode_annotations success attr.
+folder_fallback_labs:
+  - CMU_Aire

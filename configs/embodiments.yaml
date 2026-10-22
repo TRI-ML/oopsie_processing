@@ -1,0 +1,79 @@
+# Embodiment + camera registry (shared by stage5 harmonize, stage6 cameras, and
+# both exporters). NO silent defaults: a lab can only be harmonized/exported if it
+# has an entry here. The specs below were derived by inspecting real raw h5 files
+# (action/robot_states slot shapes + observations/video_paths camera names) for each
+# lab; they match the already-proven pi05/vla_foundry converter choices.
+#
+# common_dim is the padded action/state width. 18 covers the widest sampled
+# embodiment (Enatic bimanual joint16 + gripper2 = 18) and matches COMMON_DIM in
+# both proven converters.
+common_dim: 18
+
+# Canonical camera roles, in order. Exporters rename these to each trainer's
+# native camera keys (LeRobot: base_0_rgb/left_wrist_0_rgb/right_wrist_0_rgb;
+# WebDataset: base_camera/left_wrist_camera/right_wrist_camera).
+canonical_camera_roles: [base, left_wrist, right_wrist]
+
+# Sentinel: a camera role whose source is this value duplicates the resolved base
+# camera (single-arm labs that have no second wrist view).
+dup_base_sentinel: __dup_base__
+
+embodiments:
+  Charles_UFAL:
+    embodiment_id: 10
+    embodiment_name: so101_single
+    robot_name: so101_follower
+    is_biarm: false
+    gripper_name: so101_parallel_jaw
+    # motion slot picked (first populated) from this priority list, then gripper.
+    motion_keys: [joint_position]
+    gripper_keys: [gripper_position]
+    cameras: {base: overhead, left_wrist: wrist, right_wrist: __dup_base__}
+
+  BONN_MB:
+    embodiment_id: 11
+    embodiment_name: ur5_single
+    robot_name: ur5
+    is_biarm: false
+    gripper_name: robotiq_2f_85
+    motion_keys: [joint_position]
+    gripper_keys: [gripper_position]
+    # BONN_MB used two external-camera naming conventions across episodes: the
+    # single third-person view is named either 'left' or 'global'. Both denote the
+    # same external camera; accept either (priority order). wrist is consistent.
+    cameras: {base: [left, global], left_wrist: wrist, right_wrist: __dup_base__}
+
+  Araya:
+    embodiment_id: 12
+    embodiment_name: franka_cartesian_single
+    robot_name: franka_panda
+    is_biarm: false
+    gripper_name: robotiq_2f_85
+    motion_keys: [cartesian_position]
+    gripper_keys: [gripper_position]
+    cameras: {base: image, left_wrist: wrist_image, right_wrist: __dup_base__}
+
+  Enatic_OpenArm:
+    # id 2 matches vla_foundry's registered openarm_biarm spec.
+    embodiment_id: 2
+    embodiment_name: openarm_biarm
+    robot_name: OpenArm_2.0
+    is_biarm: true
+    gripper_name: openarm_posforce_gripper
+    motion_keys: [joint_position]
+    gripper_keys: [gripper_position]
+    cameras: {base: ceiling, left_wrist: wrist_left, right_wrist: wrist_right}
+
+  CMU_Aire:
+    # Internally mixed lab: some tasks are joint (i2rt_yam), some cartesian
+    # (dual_ufactory_xarm7). The subset materializes the grocery_packing task,
+    # which is cartesian14 + gripper2 = 16. motion_keys lists both acceptable
+    # motion slots in priority order; the populated one is picked per episode.
+    embodiment_id: 13
+    embodiment_name: xarm7_biarm
+    robot_name: dual_ufactory_xarm7
+    is_biarm: true
+    gripper_name: ufactory_xarm_gripper_two_finger_parallel
+    motion_keys: [cartesian_position, joint_position]
+    gripper_keys: [gripper_position]
+    cameras: {base: overhead_stereo_left, left_wrist: left_wrist, right_wrist: right_wrist}
