@@ -1,0 +1,4 @@
+# Stage 3 — cruft & defect quarantine.
+mp4_probe_per_lab: 20           # mp4 to integrity-probe per lab
+mp4_min_valid_bytes: 1024       # smaller containers are treated as defective
+h5_truncation_probe_per_lab: 40 # h5 to open-and-validate per lab for truncation

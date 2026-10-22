@@ -1,0 +1,4 @@
+# Stage 1 — scope & prefix taxonomy. Pure listing + structure analysis.
+expected_real_labs: 61          # authoritative, reconciled against audit per_lab
+expected_total_prefixes: 83     # top-level prefixes present in the object listing
+expected_empty_placeholders: 15

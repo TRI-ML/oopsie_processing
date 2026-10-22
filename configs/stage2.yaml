@@ -1,0 +1,11 @@
+# Stage 2 — dedup. Content-hash a bounded sample to confirm the known redundant
+# prefixes are byte-identical copies of their originals, and scan for cross-lab
+# byte-identical episodes.
+sample_h5_per_prefix: 60        # h5 to hash per prefix under test
+mp4_hash_bytes: 1048576         # hash only the first N bytes of each mp4 (header+)
+duplicate_prefixes:
+  oopsiedata-converted-v0.1:
+    claimed_origins: [SOAR_origin, AI2_MOLMOACT2]
+  oopsie-face-raw-archive-2026-08-12:
+    claimed_origins: []         # partial raw-video duplicate; confirm by content
+cross_lab_sample_per_lab: 25    # h5 per real lab for cross-lab identical scan

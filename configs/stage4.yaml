@@ -1,0 +1,3 @@
+# Stage 4 — schema validation (oopsiedata_format_v1).
+sample_h5_per_lab: 150          # evenly-spaced bounded sample per real lab
+resolve_video_pointers: true    # check video_paths resolve to listed mp4 keys

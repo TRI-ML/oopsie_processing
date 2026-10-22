@@ -1,0 +1,5 @@
+# Cross-sample data-quality checks over the schema-validation h5 sample.
+sample_h5_per_lab: 150
+constant_traj_rel_range: 1.0e-6 # per-dim range below this over T => degenerate dim
+duration_outlier_short_s: 0.5   # episodes shorter than this are flagged
+duration_outlier_long_s: 600.0  # episodes longer than this are flagged

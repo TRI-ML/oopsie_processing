@@ -1,0 +1,34 @@
+# Shared Phase-A config. No silent defaults: every stage reads only keys that
+# are present here or in its own file; a missing key is a hard error.
+
+# --- S3 (read-only) ---
+bucket: tri-ml-datasets-uw2
+region: us-west-2
+dataset_prefix: anthonyliang/oopsie/
+
+# --- precomputed, read-only inputs (prior non-destructive sweep) ---
+artifacts_dir: /home/anthonyliang/.claude/jobs/d70b14fe/tmp
+listing_file: /home/anthonyliang/.claude/jobs/d70b14fe/tmp/oopsie_final_listing.txt
+structure_file: /home/anthonyliang/.claude/jobs/d70b14fe/tmp/structure.json
+audit_file: /home/anthonyliang/.claude/jobs/d70b14fe/tmp/audit_findings.json
+instruction_counts_file: /home/anthonyliang/.claude/jobs/d70b14fe/tmp/instruction_counts.json
+duration_estimate_file: /home/anthonyliang/.claude/jobs/d70b14fe/tmp/duration_estimate.json
+
+# --- outputs ---
+reports_dir: reports                                   # repo-relative, gitignored
+durable_dir: /home/anthonyliang/.claude/jobs/d70b14fe/tmp/phaseA   # durable JSON mirror
+
+# --- runtime ---
+scratch_dir: /home/anthonyliang/.claude/jobs/d70b14fe/tmp/_scratch
+max_pool_connections: 32
+n_workers: 16
+presign_expires_s: 900
+ffprobe_timeout_s: 90
+
+# The 4 infra prefixes that appear inside the audit's `per_lab` map but are NOT
+# real contributing labs. per_lab(65) - these(4) = 61 real labs.
+audit_infra_in_per_lab:
+  - SOAR_origin
+  - AutoEval_origin
+  - oopsiedata-converted-v0.1
+  - roboarena_upload

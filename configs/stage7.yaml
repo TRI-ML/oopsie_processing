@@ -1,0 +1,5 @@
+# Stage 7 — temporal alignment (mp4 frame count == T; fps == control_freq).
+sample_episodes_per_lab: 25     # episodes to align per lab (each probes its cams)
+max_cams_per_episode: 4         # cap cameras probed per episode
+fps_tolerance: 0.05             # relative tolerance for fps == control_freq
+frame_tolerance: 1              # allow +/-1 frame (container rounding)
